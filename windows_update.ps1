@@ -1,3 +1,4 @@
+#VERSION 2.0+
 Write-Host "#Autoupdate..."
 $URL = "https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.ps1"
 $item1 = Invoke-WebRequest -Uri $URL -Headers @{"Cache-Control"="no-cache"} | select -ExpandProperty Content 
