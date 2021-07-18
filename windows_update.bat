@@ -41,7 +41,7 @@ cd /d %~dp0
 ::START
 ::::::::::::::::::::::::::::
 
-:loop
+REM :loop
 PowerShell.exe -ExecutionPolicy Bypass -File "windows_update.ps1"
-pause
-goto loop
+REM pause
+REM goto loop
