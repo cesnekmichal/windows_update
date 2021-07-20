@@ -23,7 +23,7 @@ if($item1 -ne $null -and $item1 -ne ""){
 Write-Host "#Windows Defender Realtime Monitoring disabled."
 Set-MpPreference -DisableRealtimeMonitoring $true
 
-#Install module Nuget
+#Install module nuget
 if (Get-Module -ListAvailable -Name 'nuget') {
     Write-Host "#nuget Installed."
 } 
