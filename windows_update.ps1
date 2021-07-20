@@ -22,23 +22,23 @@ Set-MpPreference -DisableRealtimeMonitoring $true
 
 #Install module Nuget
 if (Get-Module -ListAvailable -Name 'Nuget') {
-    Write-Host "#Nuget Installed"
+    Write-Host "#Nuget Installed."
 } 
 else {
-    Write-Host "#Nuget Install..."
+    Write-Host "#Nuget Installing..."
     Find-PackageProvider -Name 'Nuget' -ForceBootstrap -IncludeDependencies
     Install-Package 'NuGet' -Force -Confirm:$False
-    Write-Host "#Nuget Installed"
+    Write-Host "#Nuget Installed."
 }
 
 #Install module  PSWindowsUpdate
 if (Get-Module -ListAvailable -Name PSWindowsUpdate) {
-    Write-Host "#PSWindowsUpdate Installed"
+    Write-Host "#PSWindowsUpdate Installed."
 } 
 else {
-    Write-Host "#PSWindowsUpdate Install"
+    Write-Host "#PSWindowsUpdate Installing..."
     Install-Module PSWindowsUpdate -Confirm:$False -Force
-    Write-Host "#PSWindowsUpdate Installed"
+    Write-Host "#PSWindowsUpdate Installed."
 }
 
 #Check for windows updates
@@ -62,7 +62,7 @@ Write-Host "#Windows Defender Updating..."
 Update-MpSignature
 
 #DONE
-Write-Host "#DONE :-)"
+Write-Host "#DONE ;-)"
 
 #FINAL SLEEP
 $i = 1
