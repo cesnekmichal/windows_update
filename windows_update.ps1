@@ -24,14 +24,14 @@ Write-Host "#Windows Defender Realtime Monitoring disabled."
 Set-MpPreference -DisableRealtimeMonitoring $true
 
 #Install module Nuget
-if (Get-Module -ListAvailable -Name 'Nuget') {
-    Write-Host "#Nuget Installed."
+if (Get-Module -ListAvailable -Name 'nuget') {
+    Write-Host "#nuget Installed."
 } 
 else {
-    Write-Host "#Nuget Installing..."
-    Find-PackageProvider -Name 'Nuget' -ForceBootstrap -IncludeDependencies
-    Install-Package 'NuGet' -Force -Confirm:$False
-    Write-Host "#Nuget Installed."
+    Write-Host "#nuget Installing..."
+    Find-PackageProvider -Name 'nuget' -ForceBootstrap -IncludeDependencies
+    Install-Package 'nuget' -Force -Confirm:$False
+    Write-Host "#nuget Installed."
 }
 
 #Install module  PSWindowsUpdate
