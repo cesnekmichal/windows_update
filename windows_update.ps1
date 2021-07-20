@@ -23,15 +23,15 @@ if($item1 -ne $null -and $item1 -ne ""){
 Write-Host "#Windows Defender Realtime Monitoring disabled."
 Set-MpPreference -DisableRealtimeMonitoring $true
 
-#Install module nuget
+#Install module nuget - #NuGet provider for the OneGet meta-package manager.
 if (Get-Module -ListAvailable -Name 'nuget') {
-    Write-Host "#nuget Installed."
+    Write-Host "#NuGet Installed."
 } 
 else {
-    Write-Host "#nuget Installing..."
+    Write-Host "#NuGet Installing..."
     Find-PackageProvider -Name 'nuget' -ForceBootstrap -IncludeDependencies
     Install-Package 'nuget' -Force -Confirm:$False
-    Write-Host "#nuget Installed."
+    Write-Host "#NuGet Installed."
 }
 
 #Install module  PSWindowsUpdate
