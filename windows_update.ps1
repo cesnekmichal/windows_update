@@ -1,7 +1,10 @@
 #VERSION 2.0+
 Write-Host "#Self Updating..."
 $URL = "https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.ps1"
-$item1 = Invoke-WebRequest -Uri $URL -Headers @{"Cache-Control"="no-cache"} | select -ExpandProperty Content 
+#This line not working on Windows 11!!!
+#$item1 = Invoke-WebRequest -Uri $URL -Headers @{"Cache-Control"="no-cache"} | select -ExpandProperty Content 
+#Replaced by this
+$item1 = (New-Object System.Net.WebClient).DownloadString($URL)
 if($item1 -ne $null -and $item1 -ne ""){
     $item2 = (Get-Content -Path .\windows_update.ps1)
     if(Compare-Object -ReferenceObject ($item1 -split '\r?\n') -DifferenceObject $item2 ){
