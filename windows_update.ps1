@@ -1,19 +1,19 @@
 #VERSION 2.0+
-Write-Host "#Autoupdate..."
+Write-Host "#Self Updating..."
 $URL = "https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.ps1"
 $item1 = Invoke-WebRequest -Uri $URL -Headers @{"Cache-Control"="no-cache"} | select -ExpandProperty Content 
 if($item1 -ne $null -and $item1 -ne ""){
     $item2 = (Get-Content -Path .\windows_update.ps1)
     if(Compare-Object -ReferenceObject ($item1 -split '\r?\n') -DifferenceObject $item2 ){
-        Write-Host "#New version detected..."
         Set-Content -Path .\windows_update.ps1 -Value $item1
+        Write-Host "#Self Updating success..."
         Powershell.exe -File .\windows_update.ps1
         Exit
     } else {
-        Write-Host "#None new version detected."
+        Write-Host "#None Self Update detected."
     }
 } else {
-    Write-Host "#Autoupdate failed :-("
+    Write-Host "#Self Updating failed :-("
 }
 
 #Disable Windows Defender Realtime Monitoring.
