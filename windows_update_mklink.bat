@@ -1,4 +1,5 @@
 @echo off
+chcp 1252
 cd %~dp0
 mkdir "%HOMEDRIVE%%HOMEPATH%\AppData\Local\windows_update"
 copy "%~dp0\windows_update.bat" "%HOMEDRIVE%%HOMEPATH%\AppData\Local\windows_update\windows_update.bat" /Y
