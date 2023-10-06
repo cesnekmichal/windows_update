@@ -44,13 +44,9 @@ else {
     Write-Host "#PSWindowsUpdate Installed."
 }
 
-#Check for windows updates
-Write-Host "#Windows Update Getting..."
-Get-WindowsUpdate -install -acceptall -autoreboot
-
-#Install the available windows updates
+#Install the available windows updates and reboot if necessary
 Write-Host "#Windows Update Installing..."
-Install-WindowsUpdate -install -acceptall -autoreboot
+Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install
 
 #Install the available Microsoft Store updates
 Write-Host "#Microsoft Store Updates..."
@@ -74,4 +70,3 @@ do{
   Write-Host -NoNewline "."
   $i++
 } while ($i -le 5)
-
