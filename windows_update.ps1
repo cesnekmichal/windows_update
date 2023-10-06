@@ -49,7 +49,7 @@ Write-Host "#Windows Update Installing..."
 Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install
 
 #Install the available Microsoft Store updates
-Write-Host "#Microsoft Store Updates..."
+Write-Host "#Microsoft Store Updates Scan..."
 Get-CimInstance -Namespace "Root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | Invoke-CimMethod -MethodName UpdateScanMethod
 
 #Enable Windows Defender Realtime Monitoring.
