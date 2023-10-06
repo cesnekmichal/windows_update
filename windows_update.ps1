@@ -1,4 +1,4 @@
-#VERSION 2.0+
+#VERSION 2.1+
 Write-Host "#Self Updating..."
 $URL = "https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.ps1"
 #This line not working on Windows 11!!!
