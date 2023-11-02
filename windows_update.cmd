@@ -80,6 +80,7 @@ EXIT /B 0
 
 
 ::==============================================================================
+:: Self Update
 :SELF_UPDATE
 set name=windows_update
 set nameCmd=%name%.cmd
