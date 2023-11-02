@@ -113,7 +113,7 @@ del "%nameDff%"
 if "%status%"=="different" (
    copy /b/b/y "%nameTmp%" "%nameCmd%"
    echo # Self Updating success...
-   timeout /T 3
+   :: timeout /T 3
    :: Delete tmp file
    del "%nameTmp%"
    EXIT /B 1
