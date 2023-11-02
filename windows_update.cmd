@@ -111,10 +111,10 @@ set /p status=<%nameDff%
 del "%nameDff%"
 :: if comparsion status is "different", then we will update the file
 if "%status%"=="different" (
-   copy /b/b/y "%nameTmp%" "%nameCmd%"
+   copy /B /V /Y "%nameTmp%" "%nameCmd%"
    echo # Self Updating success...
-   :: timeout /T 3
    :: Delete tmp file
+   echo del "%nameTmp%"
    del "%nameTmp%"
    EXIT /B 1
 ) else (
@@ -157,3 +157,4 @@ PowerShell.exe -Command "Write-Host '# DONE ;-)'"
 PowerShell.exe -Command "$i = 1; do{ Start-Sleep -s 1; Write-Host -NoNewline '.'; $i++;} while ($i -le 5)"
 EXIT /B 0
 ::==============================================================================
+
