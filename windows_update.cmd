@@ -68,7 +68,8 @@ Exit /B %errorlevel%
 if "%1"=="WINDOWS_UPDATE" (
    call :WINDOWS_UPDATE
 ) else (
-   call :SELF_UPDATE
+   call :SELF_UPDATE windows_update_mklink https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update_mklink.cmd
+   call :SELF_UPDATE windows_update        https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.cmd
    if %errorlevel%==1 (
       %comspec% /C %ScriptPath% WINDOWS_UPDATE %*
    ) else (
@@ -80,27 +81,29 @@ EXIT /B 0
 
 
 ::==============================================================================
-:: Self Update
+:: Self Update 
+:: Syntax: call :SELF_UPDATE <script_name_cmd> <url_path_to_script>
 :SELF_UPDATE
-set name=windows_update
+
+set name=%~1
 set nameCmd=%name%.cmd
 set nameTmp=%name%.tmp
 set nameDff=%name%.diff
-set URL=https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.cmd
+set URL=%~2
 
 CD /D "%~dp0"
 
-echo # Self Updating...
+echo # Self Updating %nameCmd% ...
 :: Download from URL to temporary file
 PowerShell -Command "$URL='%URL%';(New-Object System.Net.WebClient).DownloadString($URL)">%nameTmp%
 if NOT %errorlevel%==0 (
    :: Delete tmp file
    del %nameTmp%
-   echo # Downloading remote file error!
+   echo # Downloading remote file error! - %URL%
    EXIT /B 0
 )
 if NOT exist %nameTmp% (
-   echo # Downloading remote file error!
+   echo # Downloading remote file error! - %URL%
    EXIT /B 0
 )
 :: Compare original and new file to diff file
