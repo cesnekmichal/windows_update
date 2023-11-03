@@ -88,7 +88,7 @@ echo # Self Updating %nameCmd% ...
 PowerShell -Command "$URL='%URL%';(New-Object System.Net.WebClient).DownloadString($URL)">%nameTmp%
 if NOT %errorlevel%==0 (
    :: Delete tmp file
-   del %nameTmp%
+   DEL %nameTmp%
    echo # Downloading remote file error! - %URL%
    EXIT /B 0
 )
@@ -96,23 +96,27 @@ if NOT exist %nameTmp% (
    echo # Downloading remote file error! - %URL%
    EXIT /B 0
 )
+if NOT exist %nameCmd% (
+   RENAME %nameTmp% %nameCmd%
+   EXIT /B 0
+)
 :: Compare original and new file to diff file
 PowerShell -Command "$FA='%nameCmd%';$FB='%nameTmp%';if(Compare-Object -ReferenceObject $(Get-Content $FA) -DifferenceObject $(Get-Content $FB)) { echo different } else { echo same }">%nameDff%
 :: Reading output of comaring file to variable
 set /p status=<%nameDff%
 :: Deleding output tmp file
-del "%nameDff%"
+DEL "%nameDff%"
 :: if comparsion status is "different", then we will update the file
 if "%status%"=="different" (
-   copy /B /V /Y "%nameTmp%" "%nameCmd%"
+   COPY /B /V /Y "%nameTmp%" "%nameCmd%"
    echo # Self Updating success...
    :: Delete tmp file
-   del "%nameTmp%"
+   DEL "%nameTmp%"
    EXIT /B 1
 ) else (
    echo # None Self Update detected.
    :: Delete tmp file
-   del "%nameTmp%"
+   DEL "%nameTmp%"
    EXIT /B 0
 )
 EXIT /B 0
