@@ -38,13 +38,10 @@ if "%1"=="SKIP_SELF_UPDATE" (
    call :SELF_UPDATE windows_update_mklink https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update_mklink.cmd
    if !errorlevel!==1 (
       :: Self Update Success
-      echo Self Update Success now try to run self
-      echo %comspec% /C %ScriptPath% SKIP_SELF_UPDATE %*
       %comspec% /C %ScriptPath% SKIP_SELF_UPDATE %*
       EXIT /B 0
    ) else (
       :: Update not Available
-      echo Update not Available calling MAIN
       call :MAIN
       EXIT /B 0
    )
