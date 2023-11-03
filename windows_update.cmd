@@ -93,17 +93,17 @@ set URL=%~2
 
 CD /D "%~dp0"
 
-echo # Self Updating %nameCmd% ...
+echo # %nameCmd% Self Updating...
 :: Download from URL to temporary file
 PowerShell -Command "$URL='%URL%';(New-Object System.Net.WebClient).DownloadString($URL)">%nameTmp%
 if NOT %errorlevel%==0 (
    :: Delete tmp file
-   del %nameTmp%
-   echo # Downloading remote file error! - %URL%
+   DEL %nameTmp%
+   echo # %nameCmd% Downloading remote file error! - %URL%
    EXIT /B 0
 )
 if NOT exist %nameTmp% (
-   echo # Downloading remote file error! - %URL%
+   echo # %nameCmd% Downloading remote file error! - %URL%
    EXIT /B 0
 )
 if NOT exist %nameCmd% (
@@ -115,16 +115,16 @@ PowerShell -Command "$FA='%nameCmd%';$FB='%nameTmp%';if(Compare-Object -Referenc
 :: Reading output of comaring file to variable
 set /p status=<%nameDff%
 :: Deleding output tmp file
-del "%nameDff%"
+DEL "%nameDff%"
 :: if comparsion status is "different", then we will update the file
 if "%status%"=="different" (
    COPY /B /V /Y "%nameTmp%" "%nameCmd%"
-   echo # Self Updating success...
+   echo # %nameCmd% Self Updating success.
    :: Delete tmp file
    DEL "%nameTmp%"
    EXIT /B 1
 ) else (
-   echo # None Self Update detected.
+   echo # %nameCmd% None Self Update detected.
    :: Delete tmp file
    DEL "%nameTmp%"
    EXIT /B 0
