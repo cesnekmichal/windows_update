@@ -52,19 +52,28 @@ set "ScriptDir=%ScriptDir:]=^]%"
 set "ScriptName=%~n0%~x0"
 :: Script path joining script dir and script name
 set "ScriptPath=%ScriptDir%%ScriptName%"
-:: Running this script with elevated UAC and same arguments
-net file 1>nul 2>nul && goto :run || PowerShell.exe -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/C %ScriptPath% %*'"
-if %errorlevel% NEQ 0 (
-    :: Exit with Return Code 8
-    Exit /B 8
+:: Test to UAC Privileges
+NET FILE 1>NUL 2>NUL
+:: if %errorlevel% is ZERO then UAC Privileges are already available, otherwise not
+if %errorlevel% EQU 0 (
+   goto :MAIN
+) else (
+   :: Running this script via PowerShell with UAC Privileges Prompt and all input parameters
+   PowerShell.exe -Command "Start-Process -Verb RunAs -WindowStyle hidden -FilePath '%comspec%' -ArgumentList '/C %ScriptPath% %*'"
 )
-:: Exit with %errorlevel%
-Exit /B %errorlevel%
+:: Retun code in %errorlevel% always throught PowerShell will be only 0=success or 1=failed
+if %errorlevel% NEQ 0 (
+   :: Exit with Return Code 8
+   EXIT /B 8
+)
+:: Exit with Return Code 0
+EXIT /B 0
 ::::::::::::::::::::::::::::::::::::::::
 
 
 ::==============================================================================
-:run
+:: MAIN Function
+:MAIN
 if "%1"=="WINDOWS_UPDATE" (
    call :WINDOWS_UPDATE
 ) else (
