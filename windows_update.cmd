@@ -59,7 +59,7 @@ if %errorlevel% EQU 0 (
    goto :MAIN
 ) else (
    :: Running this script via PowerShell with UAC Privileges Prompt and all input parameters
-   PowerShell.exe -Command "Start-Process -Verb RunAs -WindowStyle hidden -FilePath '%comspec%' -ArgumentList '/C %ScriptPath% %*'"
+   PowerShell.exe -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/C %ScriptPath% %*'"
 )
 :: Retun code in %errorlevel% always throught PowerShell will be only 0=success or 1=failed
 if %errorlevel% NEQ 0 (
