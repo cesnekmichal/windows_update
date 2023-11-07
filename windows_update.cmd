@@ -6,26 +6,6 @@ Title Windows Update 3.0
 ::::::::::::::::::::::::::::::::::::::::
 :: User Account Control - UAC ELEVATE ::
 :: 
-:: In some versions of PowerShell, the Start-Process -Wait parameter does not work. 
-:: It is in the documentation, but when using the function it prints an error and the running process does not wait.
-:: Therefore, it is better not to use this parameter until version PowerShell 3.
-:: 
-:: Start-Process -Wait working status
-:: ------------------------------------
-::  OS version | PS version   |  -Wait
-:: ------------------------------------
-:: Windows 7   - PowerShell 2 -   not
-:: Windows 8   - PowerShell 3 -   not
-:: Windows 8.1 - PowerShell 4 -   yes
-:: Windows 10  - PowerShell 5 -   yes
-:: Windows 11  - PowerShell 5 -   yes
-:: If PowerShell Major version is greater than or equal 4, so we use parametr -Wait
-for /f %%i in ('PowerShell.exe -Command "echo  $PSVersionTable.PSVersion.Major"') do set OUT=%%i
-set /a psVersion = %OUT%
-:: echo.%psVersion%>PSVersion.txt
-if %psVersion% GEQ 4 (
-   set WAIT=-Wait
-)
 :: Path to script directory location
 set "ScriptDir=%~dp0"
 :: Escaping roofs with: double 'roof'
