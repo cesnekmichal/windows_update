@@ -133,11 +133,11 @@ PowerShell.exe -Command "if (Get-Module -ListAvailable -Name 'nuget') { Write-Ho
 :: #Install module  PSWindowsUpdate
 PowerShell.exe -Command "if (Get-Module -ListAvailable -Name PSWindowsUpdate) { Write-Host '# PSWindowsUpdate Installed.'; } else { Write-Host '# PSWindowsUpdate Installing...'; Install-Module PSWindowsUpdate -Confirm:$False -Force; Write-Host '# PSWindowsUpdate Installed.'; }"
 
-:: #Hide problematic KB5034441
-PowerShell.exe -ExecutionPolicy Bypass -Command "Write-Host '# Hide problematic KB5034441 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5034441 -AcceptAll;"
-
 :: #Install the available windows updates and reboot if necessary
 PowerShell.exe -ExecutionPolicy Bypass -Command "Write-Host '# Windows Update Installing...'; Import-Module PSWindowsUpdate; Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install;"
+
+:: #Hide problematic KB5034441 (if available and visible)
+PowerShell.exe -ExecutionPolicy Bypass -Command "if (Get-WUlist -KBArticleID KB5034441) { Write-Host '# Hide problematic KB5034441 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5034441 -AcceptAll; }"
 
 :: #Microsoft Store Updates Scan...
 PowerShell.exe -Command "Write-Host '# Microsoft Store Updates Scan...'; Get-CimInstance -Namespace "Root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | Invoke-CimMethod -MethodName UpdateScanMethod;"
