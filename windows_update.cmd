@@ -133,6 +133,9 @@ PowerShell.exe -Command "if (Get-Module -ListAvailable -Name 'nuget') { Write-Ho
 :: #Install module  PSWindowsUpdate
 PowerShell.exe -Command "if (Get-Module -ListAvailable -Name PSWindowsUpdate) { Write-Host '# PSWindowsUpdate Installed.'; } else { Write-Host '# PSWindowsUpdate Installing...'; Install-Module PSWindowsUpdate -Confirm:$False -Force; Write-Host '# PSWindowsUpdate Installed.'; }"
 
+:: #Hide problematic KB5034441
+PowerShell.exe -ExecutionPolicy Bypass -Command "Write-Host '# Hide problematic KB5034441 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5034441 -AcceptAll;"
+
 :: #Install the available windows updates and reboot if necessary
 PowerShell.exe -ExecutionPolicy Bypass -Command "Write-Host '# Windows Update Installing...'; Import-Module PSWindowsUpdate; Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install;"
 
