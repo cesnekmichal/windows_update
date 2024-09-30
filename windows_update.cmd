@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL EnableDelayedExpansion
 
-Title Windows Update 3.0
+Title Windows Update 3.1
 
 ::::::::::::::::::::::::::::::::::::::::
 :: User Account Control - UAC ELEVATE ::
