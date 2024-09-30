@@ -124,8 +124,6 @@ EXIT /B 0
 
 ::==============================================================================
 :WINDOWS_UPDATE
-:: #Disable Windows Defender Realtime Monitoring.
-PowerShell.exe -Command "Write-Host '# Windows Defender Realtime Monitoring disabled.'; Set-MpPreference -DisableRealtimeMonitoring $true;"
 
 :: #Install module nuget - #NuGet provider for the OneGet meta-package manager.
 PowerShell.exe -Command "if (Get-Module -ListAvailable -Name 'nuget') { Write-Host '# NuGet Installed.'; } else { Write-Host '# NuGet Installing...'; Find-PackageProvider -Name 'nuget' -ForceBootstrap -IncludeDependencies; Install-Package 'nuget' -Force -Confirm:$False; Write-Host '# NuGet Installed.'; }"
@@ -136,14 +134,12 @@ PowerShell.exe -Command "if (Get-Module -ListAvailable -Name PSWindowsUpdate) { 
 :: #Install the available windows updates and reboot if necessary
 PowerShell.exe -ExecutionPolicy Bypass -Command "Write-Host '# Windows Update Installing...'; Import-Module PSWindowsUpdate; Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install;"
 
-:: #Hide problematic KB5034441 (if available and visible)
+:: #Hide problematic KB5034441,KB5001716 (if available and visible)
 PowerShell.exe -ExecutionPolicy Bypass -Command "if (Get-WUlist -KBArticleID KB5034441) { Write-Host '# Hide problematic KB5034441 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5034441 -AcceptAll; }"
+PowerShell.exe -ExecutionPolicy Bypass -Command "if (Get-WUlist -KBArticleID KB5001716) { Write-Host '# Hide problematic KB5001716 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5001716 -AcceptAll; }"
 
 :: #Microsoft Store Updates Scan...
 PowerShell.exe -Command "Write-Host '# Microsoft Store Updates Scan...'; Get-CimInstance -Namespace "Root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | Invoke-CimMethod -MethodName UpdateScanMethod;"
-
-:: #Enable Windows Defender Realtime Monitoring.
-PowerShell.exe -Command "Write-Host '# Windows Defender Realtime Monitoring enabled.'; Set-MpPreference -DisableRealtimeMonitoring $false;"
 
 :: #Update Windows Defender
 PowerShell.exe -Command "Write-Host '# Windows Defender Updating...'; Update-MpSignature;"
@@ -155,3 +151,4 @@ PowerShell.exe -Command "Write-Host '# DONE ;-)'"
 PowerShell.exe -Command "$i = 1; do{ Start-Sleep -s 1; Write-Host -NoNewline '.'; $i++;} while ($i -le 5)"
 EXIT /B 0
 ::==============================================================================
+
