@@ -139,7 +139,7 @@ PowerShell.exe -ExecutionPolicy Bypass -Command "if (Get-WUlist -KBArticleID KB5
 PowerShell.exe -ExecutionPolicy Bypass -Command "if (Get-WUlist -KBArticleID KB5001716) { Write-Host '# Hide problematic KB5001716 update...'; Import-Module PSWindowsUpdate; Hide-WindowsUpdate -KBArticleID KB5001716 -AcceptAll; }"
 
 :: #Microsoft Store Updates Scan...
-PowerShell.exe -Command "Write-Host '# Microsoft Store Updates Scan...'; Get-CimInstance -Namespace "Root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | Invoke-CimMethod -MethodName UpdateScanMethod;"
+explorer.exe ms-windows-store:updates
 
 :: #Update Windows Defender
 PowerShell.exe -Command "Write-Host '# Windows Defender Updating...'; Update-MpSignature;"
