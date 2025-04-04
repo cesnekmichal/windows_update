@@ -55,17 +55,17 @@ if "%1"=="SKIP_SELF_UPDATE" (
 cd /D "%~dp0"
 
 :: Copying cmd files to local windows_update location
-mkdir "%USERPROFILE%\AppData\Local\windows_update"
-copy "%~dp0\windows_update.cmd"        "%USERPROFILE%\AppData\Local\windows_update\windows_update.cmd" /Y
-copy "%~dp0\windows_update_mklink.cmd" "%USERPROFILE%\AppData\Local\windows_update\windows_update_mklink.cmd" /Y
+mkdir "%LocalAppData%\windows_update"
+copy "%~dp0\windows_update.cmd"        "%LocalAppData%\windows_update\windows_update.cmd" /Y
+copy "%~dp0\windows_update_mklink.cmd" "%LocalAppData%\windows_update\windows_update_mklink.cmd" /Y
 
 :: Creating Shortcut
-set "fileLnk=%USERPROFILE%\Desktop\Aktualizovat Windows.lnk"
-set "fileCmd=%USERPROFILE%\AppData\Local\windows_update\windows_update.cmd"
-PowerShell.exe -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%fileLnk%'); $Shortcut.TargetPath = '%fileCmd%'; $Shortcut.Save();"
+set "fileLnk=Aktualizovat Windows.lnk"
+set "fileCmd=%LocalAppData%\windows_update\windows_update.cmd"
+PowerShell.exe -Command "$Desktop = [Environment]::GetFolderPath(\"Desktop\")+'\'; $WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut($Desktop+'%fileLnk%'); $Shortcut.TargetPath = '%fileCmd%'; $Shortcut.Save();"
 
 :: Executing Shortcut
-start "" "%fileLnk%"
+PowerShell.exe -Command "$Desktop = [Environment]::GetFolderPath(\"Desktop\")+'\'; Invoke-Item $Desktop'%fileLnk%';"
 EXIT /B 0
 ::==============================================================================
 
