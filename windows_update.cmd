@@ -9,6 +9,8 @@ set "ScriptName=%~nx0"
 set "ScriptPath=%ScriptDir%%ScriptName%"
 set "FINAL_EXIT_CODE=0"
 
+:: Line endings: CRLF
+
 :: Kontrola, zda je prítomen parametr -debug nebo --debug (bezpecne bez zavorek)
 set "DEBUG_MODE=0"
 set "LOGFILE="
