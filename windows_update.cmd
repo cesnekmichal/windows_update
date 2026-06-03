@@ -37,14 +37,23 @@ call :LOG "cmd: Pozadavek na zvyseni prav (UAC)..."
 set "TMP_EXIT_FILE=%ScriptDir%%ScriptName%_exit.tmp"
 if exist "%TMP_EXIT_FILE%" del "%TMP_EXIT_FILE%"
 
-set "UAC_ARGS=%*"
 if "%DEBUG_MODE%"=="1" goto :ELEVATE_DEBUG
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/c', ([char]34 + '%ScriptPath%' + [char]34 + $(if ($env:UAC_ARGS) { ' ' + $env:UAC_ARGS } else { '' }))"
+if "%~1"=="" goto :ELEVATE_NO_ARGS
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%ScriptPath%' -ArgumentList '%*'"
+goto :EXIT_SCRIPT
+
+:ELEVATE_NO_ARGS
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%ScriptPath%'"
 goto :EXIT_SCRIPT
 
 :ELEVATE_DEBUG
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/c', ([char]34 + '%ScriptPath%' + [char]34 + $(if ($env:UAC_ARGS) { ' ' + $env:UAC_ARGS } else { '' })) -Wait"
+if "%~1"=="" goto :ELEVATE_DEBUG_NO_ARGS
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%ScriptPath%' -ArgumentList '%*' -Wait"
+goto :EXIT_SCRIPT
+
+:ELEVATE_DEBUG_NO_ARGS
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%ScriptPath%' -Wait"
 
 :: Cteni navratoveho kodu z docasneho souboru (bezpecne bez zavorek)
 set "FINAL_EXIT_CODE=0"
