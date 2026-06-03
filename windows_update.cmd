@@ -32,11 +32,17 @@ call :LOG "cmd: Skript spusten. Uzivatel: %USERNAME%, Pravomoci: %IS_ELEVATED%, 
 
 if "%IS_ELEVATED%"=="Yes" goto :MAIN
 
-:: Bezpecne spusteni s UAC privilegem pomoci PowerShellu a cekani na dokonceni
+:: Bezpecne spusteni s UAC privilegem pomoci PowerShellu
 call :LOG "cmd: Pozadavek na zvyseni prav (UAC)..."
 set "TMP_EXIT_FILE=%ScriptDir%%ScriptName%_exit.tmp"
 if exist "%TMP_EXIT_FILE%" del "%TMP_EXIT_FILE%"
 
+if "%DEBUG_MODE%"=="1" goto :ELEVATE_DEBUG
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList ('/c ' + [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' %*' + [char]34)"
+goto :EXIT_SCRIPT
+
+:ELEVATE_DEBUG
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList ('/c ' + [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' %*' + [char]34) -Wait"
 
 :: Cteni navratoveho kodu z docasneho souboru (bezpecne bez zavorek)
@@ -121,7 +127,7 @@ fc /b "%nameCmd%" "%nameTmp%" >nul
 if errorlevel 1 (
     if /i "%nameCmd%"=="%ScriptName%" (
         call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
-        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y \"%nameTmp%\" \"%nameCmd%\" >nul & del \"%nameTmp%\" & \"%ScriptPath%\" WINDOWS_UPDATE %*"
+        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y \"%ScriptDir%%nameTmp%\" \"%ScriptDir%%nameCmd%\" >nul & del \"%ScriptDir%%nameTmp%\" & \"%ScriptPath%\" WINDOWS_UPDATE %*"
         exit /b 1
     )
     copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
