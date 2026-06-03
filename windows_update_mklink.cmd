@@ -86,8 +86,8 @@ copy /y "windows_update_mklink.cmd" "%LocalAppData%\windows_update\windows_updat
 
 call :LOG "cmd: Skripty byly zkopirovany do slozky AppData\Local\windows_update."
 
-:: Vytvoreni zastupce na plose pomoci PowerShellu bezpecne (odolne vuci OneDrive a apostrofum) a jeho spusteni
-call :LOG "cmd: Vytvarim a spoustim zástupce na plose..."
+:: Vytvoreni zastupce na plose pomoci PowerShellu bezpecne (odolne vuci OneDrive a apostrofum)
+call :LOG "cmd: Vytvarim zástupce na plose..."
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "$fileLnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Aktualizovat Windows.lnk';" ^
     "$fileCmd = Join-Path ($env:LocalAppData) 'windows_update\windows_update.cmd';" ^
@@ -97,10 +97,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "$lnkArgs = @();" ^
     "if ($env:NO_UPDATE -eq '1') { $lnkArgs += '-noupdate' };" ^
     "if ($lnkArgs.Count -gt 0) { $Shortcut.Arguments = $lnkArgs -join ' ' };" ^
-    "$Shortcut.Save();" ^
-    "Start-Process $fileLnk;"
+    "$Shortcut.Save();"
 
-call :LOG "cmd: Zástupce vytvoren a spusten."
+call :LOG "cmd: Zástupce vytvoren."
 exit /b 0
 
 ::==============================================================================
