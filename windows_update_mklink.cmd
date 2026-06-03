@@ -134,7 +134,7 @@ fc /b "%nameCmd%" "%nameTmp%" >nul
 if errorlevel 1 (
     if /i "%nameCmd%"=="%ScriptName%" (
         call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
-        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y ^"%ScriptDir%%nameTmp%^" ^"%ScriptDir%%nameCmd%^" >nul & del ^"%ScriptDir%%nameTmp%^" & ^"%ScriptPath%^" SKIP_SELF_UPDATE %*"
+        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y "%ScriptDir%%nameTmp%" "%ScriptDir%%nameCmd%" >nul & del "%ScriptDir%%nameTmp%" & "%ScriptPath%" SKIP_SELF_UPDATE %*"
         exit /b 1
     )
     copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
