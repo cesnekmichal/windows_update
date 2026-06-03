@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-title Windows Update 3.1
+title Windows Update 3.2
 
 :: Cesta k adresari skriptu
 set "ScriptDir=%~dp0"
@@ -88,7 +88,7 @@ if not "%DEBUG_MODE%"=="1" goto :LOG_CONSOLE
 if "%LOGFILE%"=="" goto :LOG_CONSOLE
 echo [%date% %time%] [INFO] %~1 >> "%LOGFILE%"
 :LOG_CONSOLE
-echo # %~1
+echo %~1
 exit /b 0
 
 ::==============================================================================
