@@ -132,6 +132,11 @@ if not exist "%nameCmd%" (
 :: Rychle binarni porovnani pomoci nativniho fc.exe
 fc /b "%nameCmd%" "%nameTmp%" >nul
 if errorlevel 1 (
+    if /i "%nameCmd%"=="%ScriptName%" (
+        call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
+        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y \"%nameTmp%\" \"%nameCmd%\" >nul & del \"%nameTmp%\" & \"%ScriptPath%\" SKIP_SELF_UPDATE %*"
+        exit /b 1
+    )
     copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
     call :LOG "cmd: %nameCmd% aktualizovan."
     del "%nameTmp%"
