@@ -11,14 +11,14 @@ set "FINAL_EXIT_CODE=0"
 
 :: Line endings: CRLF
 
-:: Kontrola, zda je prítomen parametr -debug nebo --debug (bezpecne bez zavorek)
+:: Kontrola, zda je pritomen parametr -debug nebo --debug (bezpecne bez zavorek)
 set "DEBUG_MODE=0"
 set "LOGFILE="
 for %%a in (%*) do if /i "%%a"=="-debug" set "DEBUG_MODE=1"
 for %%a in (%*) do if /i "%%a"=="--debug" set "DEBUG_MODE=1"
 if "%DEBUG_MODE%"=="1" set "LOGFILE=%ScriptDir%windows_update_debug.log"
 
-:: Kontrola, zda je prítomen parametr -noupdate nebo --noupdate (bezpecne bez zavorek)
+:: Kontrola, zda je pritomen parametr -noupdate nebo --noupdate (bezpecne bez zavorek)
 set "NO_UPDATE=0"
 for %%a in (%*) do if /i "%%a"=="-noupdate" set "NO_UPDATE=1"
 for %%a in (%*) do if /i "%%a"=="--noupdate" set "NO_UPDATE=1"
@@ -68,7 +68,7 @@ echo %~1
 exit /b 0
 
 ::==============================================================================
-:: Hlavni funkce (vytvoreni slozky, zkopirovani skriptu a vytvoreni zástupce)
+:: Hlavni funkce (vytvoreni slozky, zkopirovani skriptu a vytvoreni zastupce)
 ::==============================================================================
 :MAIN
 cd /d "%ScriptDir%"
@@ -87,7 +87,7 @@ copy /y "windows_update_mklink.cmd" "%LocalAppData%\windows_update\windows_updat
 call :LOG "cmd: Skripty byly zkopirovany do slozky AppData\Local\windows_update."
 
 :: Vytvoreni zastupce na plose pomoci PowerShellu bezpecne (odolne vuci OneDrive a apostrofum)
-call :LOG "cmd: Vytvarim zástupce na plose..."
+call :LOG "cmd: Vytvarim zastupce na plose..."
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "$fileLnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Aktualizovat Windows.lnk';" ^
     "$fileCmd = Join-Path ($env:LocalAppData) 'windows_update\windows_update.cmd';" ^
@@ -99,11 +99,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "if ($lnkArgs.Count -gt 0) { $Shortcut.Arguments = $lnkArgs -join ' ' };" ^
     "$Shortcut.Save();"
 
-call :LOG "cmd: Zástupce vytvoren."
+call :LOG "cmd: Zastupce vytvoren."
 exit /b 0
 
 ::==============================================================================
-:: Funkce pro Self Update (Vrací 1 pri zmene, 0 pri neuspechu/shode)
+:: Funkce pro Self Update (Vraci 1 pri zmene, 0 pri neuspechu/shode)
 ::==============================================================================
 :SELF_UPDATE
 set "name=%~1"

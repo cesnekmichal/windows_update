@@ -11,19 +11,19 @@ set "FINAL_EXIT_CODE=0"
 
 :: Line endings: CRLF
 
-:: Kontrola, zda je prítomen parametr -debug nebo --debug (bezpecne bez zavorek)
+:: Kontrola, zda je pritomen parametr -debug nebo --debug (bezpecne bez zavorek)
 set "DEBUG_MODE=0"
 set "LOGFILE="
 for %%a in (%*) do if /i "%%a"=="-debug" set "DEBUG_MODE=1"
 for %%a in (%*) do if /i "%%a"=="--debug" set "DEBUG_MODE=1"
 if "%DEBUG_MODE%"=="1" set "LOGFILE=%ScriptDir%windows_update_debug.log"
 
-:: Kontrola, zda je prítomen parametr -noupdate nebo --noupdate (bezpecne bez zavorek)
+:: Kontrola, zda je pritomen parametr -noupdate nebo --noupdate (bezpecne bez zavorek)
 set "NO_UPDATE=0"
 for %%a in (%*) do if /i "%%a"=="-noupdate" set "NO_UPDATE=1"
 for %%a in (%*) do if /i "%%a"=="--noupdate" set "NO_UPDATE=1"
 
-:: Kontrola administrátorskych prav (bezpecne bez zavorek)
+:: Kontrola administratorskych prav (bezpecne bez zavorek)
 set "IS_ELEVATED=No"
 net file 1>nul 2>nul
 if %errorlevel% equ 0 set "IS_ELEVATED=Yes"
@@ -64,7 +64,7 @@ call :LOG "cmd: Elevovany proces dokoncen s navratovym kodem: !FINAL_EXIT_CODE!"
 goto :EXIT_SCRIPT
 
 :MAIN
-:: Pokud byl skript spusten s parametrem, preskocíme self-update
+:: Pokud byl skript spusten s parametrem, preskocime self-update
 if "%~1"=="WINDOWS_UPDATE" goto :RUN_UPDATE
 :: V debug rezimu nebo s parametrem -noupdate preskocime self-update
 if "%DEBUG_MODE%"=="1" (
@@ -108,7 +108,7 @@ echo %~1
 exit /b 0
 
 ::==============================================================================
-:: Funkce pro Self Update (Vrací 1 pri zmene, 0 pri neuspechu/shode)
+:: Funkce pro Self Update (Vraci 1 pri zmene, 0 pri neuspechu/shode)
 ::==============================================================================
 :SELF_UPDATE
 set "name=%~1"
@@ -229,7 +229,7 @@ function Invoke-AndLog {
     param([scriptblock]$ScriptBlock, [string]$Message)
     Write-Log $Message
     try {
-        # Spusteni bloku a sloučení všech kanálu do success streamu
+        # Spusteni bloku a slouceni vsech kanalu do success streamu
         & $ScriptBlock *>&1 | ForEach-Object {
             Write-Log "ps1: $_"
         }
@@ -256,7 +256,7 @@ Invoke-AndLog {
     }
 } "ps1: Kontrola PSWindowsUpdate modulu..."
 
-# Vyhledani a instalace Windows aktualizací
+# Vyhledani a instalace Windows aktualizaci
 Invoke-AndLog {
     Import-Module PSWindowsUpdate
     Get-WindowsUpdate -AcceptAll -AutoReboot -Download -Install
