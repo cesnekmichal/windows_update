@@ -37,13 +37,14 @@ call :LOG "cmd: Pozadavek na zvyseni prav (UAC)..."
 set "TMP_EXIT_FILE=%ScriptDir%%ScriptName%_exit.tmp"
 if exist "%TMP_EXIT_FILE%" del "%TMP_EXIT_FILE%"
 
+set "UAC_ARGS=%*"
 if "%DEBUG_MODE%"=="1" goto :ELEVATE_DEBUG
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList ('/c ' + [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' %*' + [char]34)"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/c', $(if ($env:UAC_ARGS) { [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' ' + $env:UAC_ARGS + [char]34 } else { [char]34 + [char]34 + '%ScriptPath%' + [char]34 + [char]34 })"
 goto :EXIT_SCRIPT
 
 :ELEVATE_DEBUG
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList ('/c ' + [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' %*' + [char]34) -Wait"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -Verb RunAs -FilePath '%comspec%' -ArgumentList '/c', $(if ($env:UAC_ARGS) { [char]34 + [char]34 + '%ScriptPath%' + [char]34 + ' ' + $env:UAC_ARGS + [char]34 } else { [char]34 + [char]34 + '%ScriptPath%' + [char]34 + [char]34 }) -Wait"
 
 :: Cteni navratoveho kodu z docasneho souboru (bezpecne bez zavorek)
 set "FINAL_EXIT_CODE=0"
