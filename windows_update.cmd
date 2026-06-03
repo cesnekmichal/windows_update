@@ -127,7 +127,7 @@ fc /b "%nameCmd%" "%nameTmp%" >nul
 if errorlevel 1 (
     if /i "%nameCmd%"=="%ScriptName%" (
         call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
-        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y \"%ScriptDir%%nameTmp%\" \"%ScriptDir%%nameCmd%\" >nul & del \"%ScriptDir%%nameTmp%\" & \"%ScriptPath%\" WINDOWS_UPDATE %*"
+        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y ^"%ScriptDir%%nameTmp%^" ^"%ScriptDir%%nameCmd%^" >nul & del ^"%ScriptDir%%nameTmp%^" & ^"%ScriptPath%^" WINDOWS_UPDATE %*"
         exit /b 1
     )
     copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
@@ -158,6 +158,7 @@ exit /b %errorlevel%
 :EXIT_SCRIPT
 :: Ulozeni navratoveho kodu pro parent proces (bezpecne bez zavorek)
 if not "%IS_ELEVATED%"=="Yes" goto :SKIP_EXIT_TMP
+if not "%DEBUG_MODE%"=="1" goto :SKIP_EXIT_TMP
 echo %FINAL_EXIT_CODE% > "%ScriptDir%%ScriptName%_exit.tmp"
 :SKIP_EXIT_TMP
 call :LOG "cmd: Skript dokoncen s navratovym kodem: %FINAL_EXIT_CODE%"
