@@ -1,123 +1,138 @@
 @echo off
-SETLOCAL EnableDelayedExpansion
+setlocal EnableDelayedExpansion
 
-Title "Windows Update MKLink"
+title Windows Update MKLink
 
-:: Path to script directory location
+:: Cesta k adresari skriptu
 set "ScriptDir=%~dp0"
-:: Escaping roofs with: double 'roof'
-set "ScriptDir=%ScriptDir:^=^^%"
-:: Escaping ampersands with: 'roof'
-set "ScriptDir=%ScriptDir:&=^&%"
-:: Escaping spaces with: 'roof'
-set "ScriptDir=%ScriptDir: =^ %"
-:: Escaping apostrofs with: double 'apostrof'
-set "ScriptDir=%ScriptDir:'=''%"
-:: Escaping left bracket with: 'roof'
-set "ScriptDir=%ScriptDir:(=^(%"
-:: Escaping right bracket with: 'roof'
-set "ScriptDir=%ScriptDir:)=^)%"
-:: Escaping left brace with: 'roof'
-set "ScriptDir=%ScriptDir:{=^{%"
-:: Escaping right brace with: 'roof'
-set "ScriptDir=%ScriptDir:}=^}%"
-:: Escaping left square bracket with: 'roof'
-set "ScriptDir=%ScriptDir:[=^[%"
-:: Escaping right square bracket with: 'roof'
-set "ScriptDir=%ScriptDir:]=^]%"
-:: Script name %~n0 with extension %~x0
-set "ScriptName=%~n0%~x0"
-:: Script path joining script dir and script name
+set "ScriptName=%~nx0"
 set "ScriptPath=%ScriptDir%%ScriptName%"
+set "FINAL_EXIT_CODE=0"
 
-if "%1"=="SKIP_SELF_UPDATE" (
-   call :MAIN
-   EXIT /B 0
-) else (
-   call :SELF_UPDATE windows_update        https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.cmd
-   call :SELF_UPDATE windows_update_mklink https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update_mklink.cmd
-   if !errorlevel!==1 (
-      :: Self Update Success
-      %comspec% /C %ScriptPath% SKIP_SELF_UPDATE %*
-      EXIT /B 0
-   ) else (
-      :: Update not Available
-      call :MAIN
-      EXIT /B 0
-   )
+:: Kontrola, zda je prítomen parametr -debug nebo --debug (bezpecne bez zavorek)
+set "DEBUG_MODE=0"
+set "LOGFILE="
+for %%a in (%*) do if /i "%%a"=="-debug" set "DEBUG_MODE=1"
+for %%a in (%*) do if /i "%%a"=="--debug" set "DEBUG_MODE=1"
+if "%DEBUG_MODE%"=="1" set "LOGFILE=%ScriptDir%windows_update_debug.log"
+
+call :LOG "cmd: Skript spusten. Uzivatel: %USERNAME%, Argumenty: %*"
+
+:: Spusteni hlavniho toku
+if "%~1"=="SKIP_SELF_UPDATE" goto :RUN_MAIN
+:: V debug rezimu preskocime self-update, abychom neprepysali testovany kod remote verzi
+if "%DEBUG_MODE%"=="1" (
+    call :LOG "cmd: Debug rezim aktivni. Preskakuji self-update."
+    goto :RUN_MAIN
 )
 
+:: Kontrola aktualizace obou skriptu
+call :SELF_UPDATE windows_update        https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update.cmd
+set "UPDATED_UPDATE=%errorlevel%"
+
+call :SELF_UPDATE windows_update_mklink https://raw.githubusercontent.com/cesnekmichal/windows_update/master/windows_update_mklink.cmd
+set "UPDATED_MKLINK=%errorlevel%"
+
+:: Pokud se aktualizoval tento skript samotny, restartujeme ho (bezpecne bez zavorek)
+if not "%UPDATED_MKLINK%"=="1" goto :RUN_MAIN
+call :LOG "cmd: Skript windows_update_mklink.cmd se zaktualizoval, restartuji..."
+%comspec% /c "%ScriptPath%" SKIP_SELF_UPDATE %*
+set "FINAL_EXIT_CODE=%errorlevel%"
+goto :EXIT_SCRIPT
+
+:RUN_MAIN
+call :MAIN
+set "FINAL_EXIT_CODE=%errorlevel%"
+goto :EXIT_SCRIPT
+
 ::==============================================================================
-:: MAIN running function
+:: Funkce pro logovani (Zcela bezpecne bez zavorek kuli moznemu vyskytu spec. znaku v %~1)
+::==============================================================================
+:LOG
+if not "%DEBUG_MODE%"=="1" goto :LOG_CONSOLE
+if "%LOGFILE%"=="" goto :LOG_CONSOLE
+echo [%date% %time%] [INFO] %~1 >> "%LOGFILE%"
+:LOG_CONSOLE
+echo # %~1
+exit /b 0
+
+::==============================================================================
+:: Hlavni funkce (vytvoreni slozky, zkopirovani skriptu a vytvoreni zástupce)
+::==============================================================================
 :MAIN
+cd /d "%ScriptDir%"
 
-:: Go to current script direcotry
-cd /D "%~dp0"
+:: Vytvoreni lokalni slozky pro skript v AppData (pokud neexistuje)
+if not exist "%USERPROFILE%\AppData\Local\windows_update" (
+    call :LOG "cmd: Vytvarim slozku AppData\Local\windows_update..."
+    mkdir "%USERPROFILE%\AppData\Local\windows_update"
+)
 
-:: Copying cmd files to local windows_update location
-mkdir "%LocalAppData%\windows_update"
-copy "%~dp0\windows_update.cmd"        "%LocalAppData%\windows_update\windows_update.cmd" /Y
-copy "%~dp0\windows_update_mklink.cmd" "%LocalAppData%\windows_update\windows_update_mklink.cmd" /Y
+:: Zkopirovani aktualnich skriptu do AppData
+call :LOG "cmd: Kopiruji skripty do AppData..."
+copy /y "windows_update.cmd"        "%LocalAppData%\windows_update\windows_update.cmd" >nul
+copy /y "windows_update_mklink.cmd" "%LocalAppData%\windows_update\windows_update_mklink.cmd" >nul
 
-:: Creating Shortcut
-set "fileLnk=Aktualizovat Windows.lnk"
-set "fileCmd=%LocalAppData%\windows_update\windows_update.cmd"
-PowerShell.exe -Command "$Desktop = [Environment]::GetFolderPath(\"Desktop\")+'\'; $WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut($Desktop+'%fileLnk%'); $Shortcut.TargetPath = '%fileCmd%'; $Shortcut.Save();"
+call :LOG "cmd: Skripty byly zkopirovany do slozky AppData\Local\windows_update."
 
-:: Executing Shortcut
-PowerShell.exe -Command "$Desktop = [Environment]::GetFolderPath(\"Desktop\")+'\'; Invoke-Item $Desktop'%fileLnk%';"
-EXIT /B 0
+:: Vytvoreni zastupce na plose pomoci PowerShellu bezpecne (odolne vuci OneDrive a apostrofum) a jeho spusteni
+call :LOG "cmd: Vytvarim a spoustim zástupce na plose..."
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$fileLnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Aktualizovat Windows.lnk';" ^
+    "$fileCmd = Join-Path ($env:LocalAppData) 'windows_update\windows_update.cmd';" ^
+    "$WshShell = New-Object -ComObject WScript.Shell;" ^
+    "$Shortcut = $WshShell.CreateShortcut($fileLnk);" ^
+    "$Shortcut.TargetPath = $fileCmd;" ^
+    "if ($env:DEBUG_MODE -eq '1') { $Shortcut.Arguments = '-debug' };" ^
+    "$Shortcut.Save();" ^
+    "Start-Process $fileLnk;"
+
+call :LOG "cmd: Zástupce vytvoren a spusten."
+exit /b 0
+
 ::==============================================================================
-
-
+:: Funkce pro Self Update (Vrací 1 pri zmene, 0 pri neuspechu/shode)
 ::==============================================================================
-:: Self Update 
-:: Syntax: call :SELF_UPDATE <script_name_cmd> <url_path_to_script>
 :SELF_UPDATE
+set "name=%~1"
+set "nameCmd=%name%.cmd"
+set "nameTmp=%name%.tmp"
+set "URL=%~2"
 
-set name=%~1
-set nameCmd=%name%.cmd
-set nameTmp=%name%.tmp
-set nameDff=%name%.diff
-set URL=%~2
+cd /d "%ScriptDir%"
 
-CD /D "%~dp0"
+call :LOG "cmd: %nameCmd% Kontrola aktualizace..."
 
-echo # %nameCmd% Self Updating...
-:: Download from URL to temporary file
-PowerShell -Command "$URL='%URL%';(New-Object System.Net.WebClient).DownloadString($URL)">%nameTmp%
-if NOT %errorlevel%==0 (
-   :: Delete tmp file
-   DEL %nameTmp%
-   echo # %nameCmd% Downloading remote file error! - %URL%
-   EXIT /B 0
+:: Stazeni pres PowerShell s vynucenim TLS 1.2
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('%URL%', '%nameTmp%')" 2>nul
+if errorlevel 1 goto :DOWNLOAD_ERROR
+
+if not exist "%nameTmp%" goto :DOWNLOAD_ERROR
+
+if not exist "%nameCmd%" (
+    rename "%nameTmp%" "%nameCmd%"
+    call :LOG "cmd: %nameCmd% stazen jako novy."
+    exit /b 0
 )
-if NOT exist %nameTmp% (
-   echo # %nameCmd% Downloading remote file error! - %URL%
-   EXIT /B 0
-)
-if NOT exist %nameCmd% (
-   RENAME %nameTmp% %nameCmd%
-   EXIT /B 0
-)
-:: Compare original and new file to diff file
-PowerShell -Command "$FA='%nameCmd%';$FB='%nameTmp%';if(Compare-Object -ReferenceObject $(Get-Content $FA) -DifferenceObject $(Get-Content $FB)) { echo different } else { echo same }">%nameDff%
-:: Reading output of comaring file to variable
-set /p status=<%nameDff%
-:: Deleding output tmp file
-DEL "%nameDff%"
-:: if comparsion status is "different", then we will update the file
-if "%status%"=="different" (
-   COPY /B /V /Y "%nameTmp%" "%nameCmd%"
-   echo # %nameCmd% Self Updating success.
-   :: Delete tmp file
-   DEL "%nameTmp%"
-   EXIT /B 1
+
+:: Rychle binarni porovnani pomoci nativniho fc.exe
+fc /b "%nameCmd%" "%nameTmp%" >nul
+if errorlevel 1 (
+    copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
+    call :LOG "cmd: %nameCmd% aktualizovan."
+    del "%nameTmp%"
+    exit /b 1
 ) else (
-   echo # %nameCmd% None Self Update detected.
-   :: Delete tmp file
-   DEL "%nameTmp%"
-   EXIT /B 0
+    call :LOG "cmd: %nameCmd% je aktualni."
+    del "%nameTmp%"
+    exit /b 0
 )
-EXIT /B 0
-::==============================================================================
+
+:DOWNLOAD_ERROR
+if exist "%nameTmp%" del "%nameTmp%"
+call :LOG "cmd: Chyba pri stahovani %nameCmd% z %URL%"
+exit /b 0
+
+:EXIT_SCRIPT
+call :LOG "cmd: Skript dokoncen s navratovym kodem: %FINAL_EXIT_CODE%"
+exit /b %FINAL_EXIT_CODE%
