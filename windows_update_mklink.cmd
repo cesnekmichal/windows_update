@@ -95,7 +95,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "$Shortcut = $WshShell.CreateShortcut($fileLnk);" ^
     "$Shortcut.TargetPath = $fileCmd;" ^
     "$lnkArgs = @();" ^
-    "if ($env:DEBUG_MODE -eq '1') { $lnkArgs += '-debug' };" ^
     "if ($env:NO_UPDATE -eq '1') { $lnkArgs += '-noupdate' };" ^
     "if ($lnkArgs.Count -gt 0) { $Shortcut.Arguments = $lnkArgs -join ' ' };" ^
     "$Shortcut.Save();" ^
