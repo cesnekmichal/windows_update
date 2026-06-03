@@ -18,13 +18,22 @@ for %%a in (%*) do if /i "%%a"=="-debug" set "DEBUG_MODE=1"
 for %%a in (%*) do if /i "%%a"=="--debug" set "DEBUG_MODE=1"
 if "%DEBUG_MODE%"=="1" set "LOGFILE=%ScriptDir%windows_update_debug.log"
 
+:: Kontrola, zda je prítomen parametr -noupdate nebo --noupdate (bezpecne bez zavorek)
+set "NO_UPDATE=0"
+for %%a in (%*) do if /i "%%a"=="-noupdate" set "NO_UPDATE=1"
+for %%a in (%*) do if /i "%%a"=="--noupdate" set "NO_UPDATE=1"
+
 call :LOG "cmd: Skript spusten. Uzivatel: %USERNAME%, Argumenty: %*"
 
 :: Spusteni hlavniho toku
 if "%~1"=="SKIP_SELF_UPDATE" goto :RUN_MAIN
-:: V debug rezimu preskocime self-update, abychom neprepysali testovany kod remote verzi
+:: V debug rezimu nebo s parametrem -noupdate preskocime self-update
 if "%DEBUG_MODE%"=="1" (
     call :LOG "cmd: Debug rezim aktivni. Preskakuji self-update."
+    goto :RUN_MAIN
+)
+if "%NO_UPDATE%"=="1" (
+    call :LOG "cmd: Parametr -noupdate aktivni. Preskakuji self-update."
     goto :RUN_MAIN
 )
 
@@ -85,7 +94,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
     "$WshShell = New-Object -ComObject WScript.Shell;" ^
     "$Shortcut = $WshShell.CreateShortcut($fileLnk);" ^
     "$Shortcut.TargetPath = $fileCmd;" ^
-    "if ($env:DEBUG_MODE -eq '1') { $Shortcut.Arguments = '-debug' };" ^
+    "$lnkArgs = @();" ^
+    "if ($env:DEBUG_MODE -eq '1') { $lnkArgs += '-debug' };" ^
+    "if ($env:NO_UPDATE -eq '1') { $lnkArgs += '-noupdate' };" ^
+    "if ($lnkArgs.Count -gt 0) { $Shortcut.Arguments = $lnkArgs -join ' ' };" ^
     "$Shortcut.Save();" ^
     "Start-Process $fileLnk;"
 
