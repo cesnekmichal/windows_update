@@ -117,35 +117,64 @@ cd /d "%ScriptDir%"
 
 call :LOG "cmd: %nameCmd% Kontrola aktualizace..."
 
-:: Stazeni pres PowerShell s vynucenim TLS 1.2
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('%URL%', '%nameTmp%')" 2>nul
-if errorlevel 1 goto :DOWNLOAD_ERROR
+:: Nastaveni promennych prostredi pro prenos do PowerShellu
+set "SELF_URL=%URL%"
+set "SELF_LOCAL=%ScriptDir%%nameCmd%"
+set "SELF_TMP=%ScriptDir%%nameTmp%"
 
-if not exist "%nameTmp%" goto :DOWNLOAD_ERROR
+:: Spusteni PowerShellu: stahne text, znormalizuje, porovna a zapise novy soubor s CRLF bez BOM jen pri zmene.
+:: Vraci exit code:
+:: 0 = soubory jsou shodne, neni treba aktualizovat
+:: 1 = soubory se lisi, novy soubor byl zapsan do %nameTmp% s CRLF a bez BOM
+:: 2 = chyba stahovani/siti
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$wc = New-Object System.Net.WebClient;" ^
+    "$wc.Encoding = [System.Text.Encoding]::UTF8;" ^
+    "try { $raw = $wc.DownloadString($env:SELF_URL) } catch { exit 2 };" ^
+    "$crlf = [char]13 + [char]10;" ^
+    "$rawN = ($raw -replace '\r?\n', $crlf).TrimEnd();" ^
+    "if (-not (Test-Path $env:SELF_LOCAL)) {" ^
+    "  $utf8 = New-Object System.Text.UTF8Encoding($false);" ^
+    "  [System.IO.File]::WriteAllText($env:SELF_TMP, $rawN + $crlf, $utf8);" ^
+    "  exit 1;" ^
+    "}" ^
+    "$local = [System.IO.File]::ReadAllText($env:SELF_LOCAL, [System.Text.Encoding]::UTF8);" ^
+    "$localN = ($local -replace '\r?\n', $crlf).TrimEnd();" ^
+    "if ($rawN -ne $localN) {" ^
+    "  $utf8 = New-Object System.Text.UTF8Encoding($false);" ^
+    "  [System.IO.File]::WriteAllText($env:SELF_TMP, $rawN + $crlf, $utf8);" ^
+    "  exit 1;" ^
+    "} else {" ^
+    "  exit 0;" ^
+    "}"
 
+set "SELF_STATUS=%errorlevel%"
+
+if "%SELF_STATUS%"=="2" goto :DOWNLOAD_ERROR
+if "%SELF_STATUS%"=="0" (
+    call :LOG "cmd: %nameCmd% je aktualni."
+    if exist "%nameTmp%" del "%nameTmp%"
+    exit /b 0
+)
+
+:: Zde SELF_STATUS == 1 (lisi se, do %nameTmp% byl zapsan CRLF novy soubor)
 if not exist "%nameCmd%" (
     rename "%nameTmp%" "%nameCmd%"
     call :LOG "cmd: %nameCmd% stazen jako novy."
     exit /b 0
 )
 
-:: Rychle binarni porovnani pomoci nativniho fc.exe
-fc /b "%nameCmd%" "%nameTmp%" >nul
-if errorlevel 1 (
-    if /i "%nameCmd%"=="%ScriptName%" (
-        call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
-        start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y "%ScriptDir%%nameTmp%" "%ScriptDir%%nameCmd%" >nul & del "%ScriptDir%%nameTmp%" & "%ScriptPath%" SKIP_SELF_UPDATE %*"
-        exit /b 1
-    )
-    copy /b /v /y "%nameTmp%" "%nameCmd%" >nul
-    call :LOG "cmd: %nameCmd% aktualizovan."
-    del "%nameTmp%"
+if /i "%nameCmd%"=="%ScriptName%" (
+    call :LOG "cmd: %nameCmd% aktualizovan, restartuji..."
+    start "" cmd.exe /c "ping -n 2 127.0.0.1 >nul & copy /y "%ScriptDir%%nameTmp%" "%ScriptDir%%nameCmd%" >nul & del "%ScriptDir%%nameTmp%" & "%ScriptPath%" SKIP_SELF_UPDATE %*"
     exit /b 1
-) else (
-    call :LOG "cmd: %nameCmd% je aktualni."
-    del "%nameTmp%"
-    exit /b 0
 )
+
+copy /y "%nameTmp%" "%nameCmd%" >nul
+call :LOG "cmd: %nameCmd% aktualizovan."
+del "%nameTmp%"
+exit /b 1
 
 :DOWNLOAD_ERROR
 if exist "%nameTmp%" del "%nameTmp%"
